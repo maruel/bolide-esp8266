@@ -1,0 +1,15 @@
+{
+  "name": "Bolide",
+  "device_id": "bolide",
+  "wifi": {
+    "ssid": "Put your wifi SSID here",
+    "password": "Put your wifi password here"
+  },
+  "mqtt": {
+    "host": "Put the IP address of the MQTT server",
+    "port": 1883
+  },
+  "ota": {
+    "enabled": true
+  }
+}
