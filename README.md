@@ -11,8 +11,9 @@
 ## Design
 
 An ESP8266 connects to a MQTT server and waits for commands. It also runs a web
-server serving a MQTT client web UI that you can install as an App on your iOS
-or Android phone or tablet.
+server serving a MQTT client web UI ([try it
+online!](https://maruel.net/bolide-esp8266/?host=127.0.0.1&port=9001&device=bolide))
+that you can install as an App on your iOS or Android phone or tablet.
 
 `bolide-esp8266` uses the [Homie MQTT
 convention](https://github.com/marvinroger/homie#convention) so you can control
