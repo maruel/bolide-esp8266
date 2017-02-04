@@ -113,9 +113,10 @@ There's _many_ options for power sources:
    batteries to give 6V:
   - Similar to LiPo batteries, but [not suspectible to
     explosion](https://en.wikipedia.org/wiki/Lithium_iron_phosphate_battery#Safety).
-    The 6V is maybe (?) close enough to power the WeMos without burning it,
-    please notify the author if you tried this. They are available in both 14500
-    (AA format) and 18650, I recommend branded batteries.
+    The 6V level is too high to power the WeMos without burning the
+    [RT9013](http://www.richtek.com/assets/product_file/RT9013/DS9013-10.pdf)
+    voltage regulator. They are available in both 14500 (AA format) and 18650, I
+    recommend branded batteries.
   - I wouldn't be surprised if we see cellphones with LiFePo4 batteries in 2017.
     I said it here first! :)
 
