@@ -7,16 +7,12 @@ set -eu
 
 # Append platformio tool from Atom's package as the default if it wasn't
 # installed system wide.
-PATH="$PATH:$HOME/.atom/packages/platformio-ide/penv/bin"
-
-hash -r
-PLATFORMIO="$(which platformio)"
-
-if [ -f lib/homie-esp8266/README.md ]; then
-  echo "You had forgot to git clone with --recurse; doing it for you"
-  git submodule init
-  git submodule update
+if [ -d $HOME/.atom/packages/platformio-ide/penv/bin ]; then
+  PATH="$PATH:$HOME/.atom/packages/platformio-ide/penv/bin"
+  hash -r
 fi
+
+PLATFORMIO="$(which platformio)"
 
 platformio run --target buildfs
 echo ""

@@ -188,10 +188,16 @@ sudo systemctl restart mosquitto
 
 ### Install [PlatformIO IDE](http://platformio.org)
 
+#### GUI
+
 1. Install [Atom](https://atom.io).
 2. Open Atom. In _Settings_, _Install_, type _platformio_ in the box and choose
    _platformio-ide_.
 3. Click 'Rebuild' on the little box on the very bottom right.
+
+##### CLI
+
+Run `pip install --user --upgrade platformio`
 
 
 ## Flashing
