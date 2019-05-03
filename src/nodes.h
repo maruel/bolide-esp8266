@@ -10,6 +10,7 @@
 
 int isBool(const String &v);
 int toInt(const String &v, int min, int max);
+String urlencode(const String& src);
 
 // Wrapper for an output pin.
 class PinOut {
@@ -28,7 +29,7 @@ public:
 
   const int pin;
 
-protected:
+private:
   bool value_;
 
 private:
@@ -43,25 +44,12 @@ public:
     set(level);
   }
 
-  int set(int v) {
-    if (v <= 0) {
-      analogWrite(pin, 0);
-      value_ = 0;
-    } else if (v >= PWMRANGE) {
-      analogWrite(pin, PWMRANGE);
-      value_ = PWMRANGE;
-    } else {
-      analogWrite(pin, v);
-      value_ = v;
-    }
-    return value_;
-  }
-
+  int set(int v);
   int get() { return value_; }
 
   const int pin;
 
-protected:
+private:
   int value_;
 
 private:
@@ -76,25 +64,12 @@ public:
     set(freq);
   }
 
-  int set(int freq, int duration = -1) {
-    if (freq <= 0) {
-      noTone(pin);
-      freq_ = 0;
-    } else if (freq >= 10000) {
-      tone(pin, freq, duration);
-      freq_ = 10000;
-    } else {
-      tone(pin, freq, duration);
-      freq_ = freq;
-    }
-    return freq_;
-  }
-
+  int set(int freq, int duration = -1);
   int get() { return freq_; }
 
   const int pin;
 
-protected:
+private:
   int freq_;
 
 private:
@@ -112,27 +87,21 @@ class PinInNode : public HomieNode {
 public:
   explicit PinInNode(const char *name, void (*onSet)(bool v), int pin,
                      int mode = INPUT_PULLUP, int interval = 50)
-      : HomieNode(name, "input"), onSet(onSet) {
-    debouncer.attach(pin, mode);
-    debouncer.interval(interval);
+      : HomieNode(name, "input"), onSet_(onSet) {
+    debouncer_.attach(pin, mode);
+    debouncer_.interval(interval);
     advertise("on");
     setProperty("on").send("false");
   }
 
-  void update() {
-    debouncer.update();
-    if (debouncer.rose()) {
-      setProperty("on").send("true");
-      onSet(true);
-    } else if (debouncer.fell()) {
-      setProperty("on").send("false");
-      onSet(false);
-    }
+  void update();
+  bool get() {
+    return debouncer_.read();
   }
 
-protected:
-  void (*const onSet)(bool v);
-  Bounce debouncer;
+private:
+  void (*const onSet_)(bool v);
+  Bounce debouncer_;
 
 private:
   DISALLOW_COPY_AND_ASSIGN(PinInNode);
@@ -143,7 +112,7 @@ class PinOutNode : public HomieNode {
 public:
   explicit PinOutNode(const char *name, int pin, bool level,
                       void (*onSet)(bool v) = NULL)
-      : HomieNode(name, "output"), onSet(onSet), pin_(pin, level) {
+      : HomieNode(name, "output"), onSet_(onSet), pin_(pin, level) {
     advertise("on").settable([&](const HomieRange &range, const String &value) {
       return this->_onPropSet(value);
     });
@@ -160,20 +129,10 @@ public:
   }
 
 protected:
-  bool _onPropSet(const String &value) {
-    int v = isBool(value);
-    if (v == -1) {
-      Homie.getLogger() << getId() << ": Bad value: " << value << endl;
-      return false;
-    }
-    set(v);
-    if (onSet != NULL) {
-      onSet(v);
-    }
-    return true;
-  }
+  bool _onPropSet(const String &value);
 
-  void (*const onSet)(bool v);
+private:
+  void (*const onSet_)(bool v);
   PinOut pin_;
 
 private:
@@ -185,7 +144,7 @@ class PinPWMNode : public HomieNode {
 public:
   explicit PinPWMNode(const char *name, int pin, int level = 0,
                       void (*onSet)(int v) = NULL)
-      : HomieNode(name, "pwm"), onSet(onSet), pin_(pin, level) {
+      : HomieNode(name, "pwm"), onSet_(onSet), pin_(pin, level) {
     advertise("pwm").settable(
         [&](const HomieRange &range, const String &value) {
           return this->_onPropSet(value);
@@ -202,16 +161,10 @@ public:
   }
 
 protected:
-  bool _onPropSet(const String &value) {
-    int v = toInt(value, 0, PWMRANGE);
-    set(v);
-    if (onSet != NULL) {
-      onSet(v);
-    }
-    return true;
-  }
+  bool _onPropSet(const String &value);
 
-  void (*const onSet)(int v);
+private:
+  void (*const onSet_)(int v);
   PinPWM pin_;
 
 private:
@@ -223,7 +176,7 @@ class PinToneNode : public HomieNode {
 public:
   explicit PinToneNode(const char *name, int pin, int freq = 0,
                       void (*onSet)(int v) = NULL)
-      : HomieNode(name, "freq"), onSet(onSet), pin_(pin, freq) {
+      : HomieNode(name, "freq"), onSet_(onSet), pin_(pin, freq) {
     advertise("freq").settable(
         [&](const HomieRange &range, const String &value) {
           return this->_onPropSet(value);
@@ -240,16 +193,10 @@ public:
   }
 
 protected:
-  bool _onPropSet(const String &value) {
-    int v = toInt(value, 0, 20000);
-    set(v);
-    if (onSet != NULL) {
-      onSet(v);
-    }
-    return true;
-  }
+  bool _onPropSet(const String &value);
 
-  void (*const onSet)(int v);
+private:
+  void (*const onSet_)(int v);
   PinTone pin_;
 
 private:

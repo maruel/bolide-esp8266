@@ -189,14 +189,17 @@ void setup() {
     httpSrv.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         String url("/index.html?device=");
         const HomieInternals::ConfigStruct& cfg = Homie.getConfiguration();
-        // TODO(maruel): Escaping!!
-        url += cfg.deviceId;
+        url += urlencode(cfg.deviceId);
         url += "&host=";
-        url += cfg.mqtt.server.host;
+        url += urlencode(cfg.mqtt.server.host);
         // TODO(maruel): The websocket port number != cfg.mqtt.server.port.
         url += "&port=9001";
-        //cfg.mqtt.username;
-        //cfg.mqtt.password;
+        if (cfg.mqtt.auth) {
+          url += "&user=";
+          url += urlencode(cfg.mqtt.username);
+          url += "&pass=";
+          url += urlencode(cfg.mqtt.password);
+        }
         request->redirect(url);
     });
     httpSrv.serveStatic("/", SPIFFS, "/html/").setCacheControl("public; max-age=600");
