@@ -36,6 +36,7 @@
 
 #include <Arduino.h>
 #include <Homie.h>
+#include <ESPAsyncWebServer.h>
 
 #include "nodes.h"
 
@@ -126,6 +127,9 @@ public:
     case BACKWARD:
       set(speed, false, false);
       break;
+    case NB_DIRECTION:
+    default:
+      break;
     }
   }
 
@@ -164,7 +168,7 @@ PinToneNode buzzerNode("buzzer", BUZZER);
 
 // Web server to serve the MQTT web UI. This is NOT the web server when in
 // configuration mode.
-ESP8266WebServer *httpSrv;
+AsyncWebServer httpSrv(80);
 
 void setup() {
   Serial.begin(115200);
@@ -182,8 +186,7 @@ void setup() {
   Homie.setup();
 
   if (Homie.isConfigured()) {
-    httpSrv = new ESP8266WebServer(80);
-    httpSrv->on("/", HTTP_GET, []() {
+    httpSrv.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
         String url("/index.html?device=");
         const HomieInternals::ConfigStruct& cfg = Homie.getConfiguration();
         // TODO(maruel): Escaping!!
@@ -194,18 +197,14 @@ void setup() {
         url += "&port=9001";
         //cfg.mqtt.username;
         //cfg.mqtt.password;
-        httpSrv->sendHeader("Location", url, true);
-        httpSrv->send(307, "text/plain", "");
+        request->redirect(url);
     });
-    httpSrv->serveStatic("/", SPIFFS, "/html/", "public; max-age=600");
-    httpSrv->begin();
+    httpSrv.serveStatic("/", SPIFFS, "/html/").setCacheControl("public; max-age=600");
+    httpSrv.begin();
   }
 }
 
 void loop() {
   Homie.loop();
   buttonNode.update();
-  if (httpSrv != NULL) {
-    httpSrv->handleClient();
-  }
 }

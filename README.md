@@ -12,14 +12,15 @@
 
 An ESP8266 connects to a MQTT server and waits for commands. It also runs a web
 server serving a MQTT client web UI ([try it
-online!](https://maruel.net/bolide-esp8266/?host=127.0.0.1&port=9001&device=bolide))
+online!](https://maruel.ca/bolide-esp8266/?host=127.0.0.1&port=9001&device=bolide))
 that you can install as an App on your iOS or Android phone or tablet.
 
 `bolide-esp8266` uses the [Homie MQTT
-convention](https://github.com/marvinroger/homie#convention) so you can control
-it via any MQTT enabled automation service like [openHAB](http://openhab.org) or
-internet based services like [IFTTT](https://ifttt.com/), if you really feel the
-urge to connect stuff to the internet. ¯\\\_(ツ)\_/¯
+convention](https://github.com/homieiot/convention/blob/develop/convention.md)
+so you can control it via any MQTT enabled automation service like
+[Home Assistant](https://www.home-assistant.io/), [openHAB](http://openhab.org),
+or internet based services like [IFTTT](https://ifttt.com/), if you really feel
+the urge to connect stuff to the internet. ¯\\\_(ツ)\_/¯
 
 
 ## Hardware
@@ -56,8 +57,8 @@ urge to connect stuff to the internet. ¯\\\_(ツ)\_/¯
 - [Tactile
   button switch](https://www.aliexpress.com/wholesale?SearchText=tactile+button)
   (2$USD for 100pcs, depends on size).
-- Computer to run Mosquitto; a [9$ CHIP](https://getchip.com/pages/chip),
-  a Raspberry Pi or your workstation will do just fine.
+- Computer to run Mosquitto; a Raspberry Pi or your workstation will do just
+  fine.
 
 
 **BOM:** 36$USD, _including shipping_, with a lot of left overs.
@@ -235,22 +236,13 @@ documentation](https://homie-esp8266.readme.io/docs/getting-started#section-conn
 for more details.
 
 
-## FAQ
-
-
-### Arduino IDE
-
-The code is Arduino compatible. You _can_ use the Arduino IDE but PlatformIO is
-better designed, provides command line (CLI) tools out of the box and is the
-project is progressing faster.
-
-### Contributing
+## Contributing
 
 I gladly accept contributions via GitHub pull requests, as long as the author
 has signed the Google Contributor License.
 
 Before we can use your code, you must sign the [Google Individual Contributor
-License Agreement] (https://cla.developers.google.com/about/google-individual)
+License Agreement](https://cla.developers.google.com/about/google-individual)
 (CLA), which you can do online. The CLA is necessary mainly because you own the
 copyright to your changes, even after your contribution becomes part of our
 codebase, so we need your permission to use and distribute your code. We also

@@ -14,7 +14,16 @@ fi
 
 PLATFORMIO="$(which platformio)"
 
+echo ""
+echo "Build once to make sure the firmware is good before flashing"
+echo ""
+platformio run
+
+echo ""
+echo "Building SPIFFS"
+echo ""
 platformio run --target buildfs
+
 echo ""
 echo "Flashing SPIFFS"
 echo "This erases all saved settings"
@@ -23,6 +32,7 @@ platformio run --target uploadfs
 
 echo ""
 echo "Flashing code"
+echo ""
 platformio run --target upload
 
 echo ""

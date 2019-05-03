@@ -134,7 +134,7 @@ class PinOutNode : public HomieNode {
 public:
   explicit PinOutNode(const char *name, int pin, bool level = false,
                       void (*onSet)(bool v) = NULL)
-      : HomieNode(name, "output"), pin_(pin, level), onSet(onSet) {
+      : HomieNode(name, "output"), onSet(onSet), pin_(pin, level) {
     advertise("on").settable([&](const HomieRange &range, const String &value) {
       return this->_onPropSet(value);
     });
@@ -175,7 +175,7 @@ class PinPWMNode : public HomieNode {
 public:
   explicit PinPWMNode(const char *name, int pin, int level = 0,
                       void (*onSet)(int v) = NULL)
-      : HomieNode(name, "pwm"), pin_(pin, level), onSet(onSet) {
+      : HomieNode(name, "pwm"), onSet(onSet), pin_(pin, level) {
     advertise("pwm").settable(
         [&](const HomieRange &range, const String &value) {
           return this->_onPropSet(value);
@@ -212,7 +212,7 @@ class PinToneNode : public HomieNode {
 public:
   explicit PinToneNode(const char *name, int pin, int freq = 0,
                       void (*onSet)(int v) = NULL)
-      : HomieNode(name, "freq"), pin_(pin, freq), onSet(onSet) {
+      : HomieNode(name, "freq"), onSet(onSet), pin_(pin, freq) {
     advertise("freq").settable(
         [&](const HomieRange &range, const String &value) {
           return this->_onPropSet(value);
