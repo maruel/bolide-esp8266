@@ -204,10 +204,11 @@ Run `pip install --user --upgrade platformio`
 ## Flashing
 
 1. Connect an ESP8266 via USB.
-2. Copy `data/homie/config_sample.json` to `data/homie/config.json` and insert:
+2. (optional) Copy `config_sample.json` to `data/homie/config.json` and [edit as
+   documented](https://homieiot.github.io/homie-esp8266/docs/2.0.0/configuration/json-configuration-file/):
    - device name and id
    - Wifi SSID and password
-   - MQTT server host name
+   - MQTT server host name, port, user and password
    - This is not required, as you can do it manually via the web UI as explained
      below.
 3. Run: `./flash_all.sh` at a bash prompt.

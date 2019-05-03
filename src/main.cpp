@@ -153,8 +153,8 @@ public:
 
 // Homie nodes accessible through MQTT.
 PinPWMNode Speed("speed", MOTOR_PWM);
-PinOutNode Left("left", MOTOR_LEFT);
-PinOutNode Right("right", MOTOR_RIGHT);
+PinOutNode Left("left", MOTOR_LEFT, false);
+PinOutNode Right("right", MOTOR_RIGHT, false);
 Motors carNode(Speed, Left, Right);
 PinInNode buttonNode("button",
                      [](bool v) {
@@ -163,7 +163,7 @@ PinInNode buttonNode("button",
                        }
                      },
                      BUTTON);
-PinOutNode ledNode("led", LED);
+PinOutNode ledNode("led", LED, true);
 PinToneNode buzzerNode("buzzer", BUZZER);
 
 // Web server to serve the MQTT web UI. This is NOT the web server when in

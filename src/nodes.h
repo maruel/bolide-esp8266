@@ -1,4 +1,4 @@
-// Copyright 2016 Marc-Antoine Ruel. All rights reserved.
+// Copyright 2019 Marc-Antoine Ruel. All rights reserved.
 // Use of this source code is governed under the Apache License, Version 2.0
 // that can be found in the LICENSE file.
 
@@ -11,9 +11,10 @@
 int isBool(const String &v);
 int toInt(const String &v, int min, int max);
 
+// Wrapper for an output pin.
 class PinOut {
 public:
-  explicit PinOut(int pin, bool level = true) : pin(pin) {
+  explicit PinOut(int pin, bool level) : pin(pin) {
     pinMode(pin, OUTPUT);
     set(level);
   }
@@ -34,6 +35,7 @@ private:
   DISALLOW_COPY_AND_ASSIGN(PinOut);
 };
 
+// Wrapper for a PWM output pin.
 class PinPWM {
 public:
   explicit PinPWM(int pin, int level = 0) : pin(pin) {
@@ -66,6 +68,7 @@ private:
   DISALLOW_COPY_AND_ASSIGN(PinPWM);
 };
 
+// Wrapper for a PWM pin meant to be used as a buzzer using the tone() function.
 class PinTone {
 public:
   explicit PinTone(int pin, int freq = 0) : pin(pin) {
@@ -99,7 +102,12 @@ private:
 };
 
 //
+// Homie nodes.
+//
 
+// Homie node representing an input pin.
+//
+// Uses a debouncer with a 50ms delay.
 class PinInNode : public HomieNode {
 public:
   explicit PinInNode(const char *name, void (*onSet)(bool v), int pin,
@@ -108,16 +116,16 @@ public:
     debouncer.attach(pin, mode);
     debouncer.interval(interval);
     advertise("on");
-    setProperty("on").send("0");
+    setProperty("on").send("false");
   }
 
   void update() {
     debouncer.update();
     if (debouncer.rose()) {
-      setProperty("on").send("1");
+      setProperty("on").send("true");
       onSet(true);
     } else if (debouncer.fell()) {
-      setProperty("on").send("0");
+      setProperty("on").send("false");
       onSet(false);
     }
   }
@@ -130,9 +138,10 @@ private:
   DISALLOW_COPY_AND_ASSIGN(PinInNode);
 };
 
+// Homie node representing an output pin.
 class PinOutNode : public HomieNode {
 public:
-  explicit PinOutNode(const char *name, int pin, bool level = false,
+  explicit PinOutNode(const char *name, int pin, bool level,
                       void (*onSet)(bool v) = NULL)
       : HomieNode(name, "output"), onSet(onSet), pin_(pin, level) {
     advertise("on").settable([&](const HomieRange &range, const String &value) {
@@ -143,7 +152,7 @@ public:
 
   void set(bool level) {
     pin_.set(level);
-    setProperty("on").send(level ? "1" : "0");
+    setProperty("on").send(level ? "true" : "false");
   }
 
   bool get() {
@@ -171,6 +180,7 @@ private:
   DISALLOW_COPY_AND_ASSIGN(PinOutNode);
 };
 
+// Homie node representing a PWM output.
 class PinPWMNode : public HomieNode {
 public:
   explicit PinPWMNode(const char *name, int pin, int level = 0,
@@ -208,6 +218,7 @@ private:
   DISALLOW_COPY_AND_ASSIGN(PinPWMNode);
 };
 
+// Homie node representing a buzzer output.
 class PinToneNode : public HomieNode {
 public:
   explicit PinToneNode(const char *name, int pin, int freq = 0,
