@@ -1,0 +1,48 @@
+# Copyright 2020 Marc-Antoine Ruel. All rights reserved.
+# Use of this source code is governed under the Apache License, Version 2.0
+# that can be found in the LICENSE file.
+
+# References:
+# https://developer.github.com/webhooks/event-payloads/
+# https://github.com/actions/cache
+# https://github.com/actions/checkout
+# https://github.com/actions/setup-python
+# https://help.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions/
+# https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions
+
+on: [push, pull_request]
+name: Run tests
+jobs:
+  test_all:
+    continue-on-error: true
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: "${{matrix.os}}"
+    name: "pio run on ${{matrix.os}}"
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-python@v2
+      with:
+        python-version: '3.x'
+    - name: 'Cache: .venv'
+      uses: actions/cache@v1
+      with:
+        path: .venv
+        key: ${{ runner.os }}-venv-${{ hashFiles('setup.sh', 'requirements.txt') }}
+        restore-keys: ${{ runner.os }}-venv-
+    - name: 'Cache: .pio'
+      uses: actions/cache@v1
+      with:
+        path: .pio
+        key: ${{ runner.os }}-pio-${{ hashFiles('platformio.ini') }}
+        restore-keys: ${{ runner.os }}-pio-
+    - name: "./setup.sh"
+      run: ./setup.sh
+    # flash_all.sh will fail because it doesn't find a device, so run "pio run"
+    # manually.
+    - name: "pio run -s"
+      run: |
+        source .venv/bin/activate
+        pio run -s

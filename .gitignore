@@ -1,3 +1,3 @@
 /data/homie/config.json
-/.pioenvs
-/.piolibdeps
+/.pio
+/.venv

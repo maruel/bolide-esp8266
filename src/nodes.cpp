@@ -77,44 +77,41 @@ int PinTone::set(int freq, int duration) {
   return freq_;
 }
 
-void PinInNode::update() {
-  debouncer_.update();
-  if (debouncer_.rose()) {
-    setProperty("on").send("true");
-    onSet_(true);
-  } else if (debouncer_.fell()) {
-    setProperty("on").send("false");
-    onSet_(false);
-  }
-}
+// Homie nodes.
 
-bool PinOutNode::_onPropSet(const String &value) {
+bool PinOutNode::_from_mqtt(const String &value) {
+  Homie.getLogger() << getId() << "._from_mqtt(" << value << ")" << endl;
   int v = isBool(value);
   if (v == -1) {
-    Homie.getLogger() << getId() << ": Bad value: " << value << endl;
+    Homie.getLogger() << "  bad value" << endl;
     return false;
   }
-  set(v);
+  pin_.set(v != 0);
   if (onSet_ != NULL) {
     onSet_(v);
   }
+  setProperty("on").send(value);
   return true;
 }
 
-bool PinPWMNode::_onPropSet(const String &value) {
+bool PinPWMNode::_from_mqtt(const String &value) {
+  Homie.getLogger() << getId() << "._from_mqtt(" << value << ")" << endl;
   int v = toInt(value, 0, PWMRANGE);
   set(v);
   if (onSet_ != NULL) {
     onSet_(v);
   }
+  setProperty("pwm").send(value);
   return true;
 }
 
-bool PinToneNode::_onPropSet(const String &value) {
+bool PinToneNode::_from_mqtt(const String &value) {
+  Homie.getLogger() << getId() << "._from_mqtt(" << value << ")" << endl;
   int v = toInt(value, 0, 20000);
   set(v);
   if (onSet_ != NULL) {
     onSet_(v);
   }
+  setProperty("freq").send(value);
   return true;
 }

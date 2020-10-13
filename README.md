@@ -167,74 +167,46 @@ overall size:
   - ⚠ Lead may reduce your life expectancy but it was well worth it.
 
 
-## Software Installation
+## Software
 
-### Install mosquitto
+- Python 3.
+- [PlatformIO](http://platformio.org) (optional)
+  - `./setup.sh` installs a local version in virtualenv.
+- Mosquitto (optional)
+  - Only needed if you setup Wifi on the WeMos and want to control the chair
+    remotely or log operations.
+  - `sudo apt install mosquitto` on Ubuntu or Debian.
+  - Run the following to enable Websocket on port 9001 (adapt for other OSes):
+      ```
+      cat << 'EOF' | sudo tee /etc/mosquitto/conf.d/ws.conf
+      listener 1883
+      protocol mqtt
 
-1. On Ubuntu 16.04+ or Debian Jessie, run: `sudo apt install mosquitto`. On
-   other OSes get it from https://mosquitto.org/download.
-2. Run the following to enable Websocket on port 9001 (adapt for other OSes):
+      listener 9001
+      protocol websockets
+      EOF
+      sudo mosquitto_passwd /etc/mosquitto/passwd homie
+      sudo systemctl restart mosquitto
+      ```
 
-```
-cat << 'EOF' | sudo tee /etc/mosquitto/conf.d/ws.conf
-listener 1883
-listener 9001
-protocol websockets
-EOF
-sudo systemctl restart mosquitto
-```
-
-**⚠:** anyone on the local network and see and inject commands.
-
-
-### Install [PlatformIO IDE](http://platformio.org)
-
-#### GUI
-
-1. Install [Atom](https://atom.io).
-2. Open Atom. In _Settings_, _Install_, type _platformio_ in the box and choose
-   _platformio-ide_.
-3. Click 'Rebuild' on the little box on the very bottom right.
-
-##### CLI
-
-Run `pip install --user --upgrade platformio`
+**⚠:** anyone on the local network and see and inject commands. The ESP8266 is
+not powerful enough to do TLS/SSL reliably.
 
 
 ## Flashing
 
-1. Connect an ESP8266 via USB.
-2. (optional) Copy `config_sample.json` to `data/homie/config.json` and [edit as
+1. Connect the ESP8266 via USB.
+2. Copy `config_sample.json` to `data/homie/config.json` and [edit as
    documented](https://homieiot.github.io/homie-esp8266/docs/2.0.0/configuration/json-configuration-file/):
    - device name and id
    - Wifi SSID and password
-   - MQTT server host name, port, user and password
-   - This is not required, as you can do it manually via the web UI as explained
-     below.
+   - MQTT server host name, port, user and password (optional)
+   - Another option is to use the [manual configuration
+     mode](https://homieiot.github.io/homie-esp8266/docs/2.0.0/quickstart/getting-started/#connecting-to-the-ap-and-configuring-the-device)
+     but I don't recommend it.
 3. Run: `./flash_all.sh` at a bash prompt.
 
 The ESP8266 takes less than a second to boot.
-
-
-## Manual device configuration
-
-If `data/homie/config.json` settings didn't work out, the blue LED will be solid
-blue as the ESP8266 will boot in configuration mode. Configure it manually with
-the web UI:
-
-1. Connect to the Wifi `bolide-xxx`. The password is the `xxx` portion of the
-   SSID.
-2. Open a Web browser and navigate to http://192.168.123.1.
-3. Follow the instructions.
-   - Configure the wifi to use
-   - Configure the MQTT server to use
-   - Use a friendly name like "Bolide" and a device name like "bolide".
-   - Enable OTA.
-4. At this point the LED will go slow blink, rapid blink then will turn off.
-
-See [Homie
-documentation](https://homie-esp8266.readme.io/docs/getting-started#section-connecting-to-the-ap-and-configuring-the-device)
-for more details.
 
 
 ## Contributing

@@ -78,7 +78,7 @@ const char *dirToStr(Direction d) {
 class Motors : public HomieNode {
 public:
   Motors(PinPWMNode &pwm, PinOutNode &left, PinOutNode &right)
-      : HomieNode("car", "car"), pwm(pwm), left(left), right(right),
+      : HomieNode("car", "car", "car"), pwm(pwm), left(left), right(right),
         speed(511), dir(STOP) {
     advertise("direction")
         .settable([&](const HomieRange &range, const String &value) {
@@ -152,9 +152,9 @@ public:
 };
 
 // Homie nodes accessible through MQTT.
-PinPWMNode Speed("speed", MOTOR_PWM);
-PinOutNode Left("left", MOTOR_LEFT, false);
-PinOutNode Right("right", MOTOR_RIGHT, false);
+PinPWMNode Speed("speed", MOTOR_PWM, NULL);
+PinOutNode Left("left", MOTOR_LEFT, false, NULL);
+PinOutNode Right("right", MOTOR_RIGHT, false, NULL);
 Motors carNode(Speed, Left, Right);
 PinInNode buttonNode("button",
                      [](bool v) {
@@ -162,9 +162,9 @@ PinInNode buttonNode("button",
                          carNode.toggle();
                        }
                      },
-                     BUTTON);
-PinOutNode ledNode("led", LED, true);
-PinToneNode buzzerNode("buzzer", BUZZER);
+                     BUTTON, NULL);
+PinOutNode ledNode("led", LED, true, NULL);
+PinToneNode buzzerNode("buzzer", BUZZER, NULL);
 
 // Web server to serve the MQTT web UI. This is NOT the web server when in
 // configuration mode.

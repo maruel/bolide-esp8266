@@ -3,7 +3,7 @@
 # Use of this source code is governed under the Apache License, Version 2.0
 # that can be found in the LICENSE file.
 
-# Update both the code and data partitions.
+# Only update code, not data.
 
 set -eu
 
@@ -12,20 +12,6 @@ cd "$(dirname $0)"
 ./setup.sh
 
 source .venv/bin/activate
-
-if [ ! -f data/homie/config.json ]; then
-  echo "Create data/homie/config.json file first."
-  echo "See config_example.json as a example."
-  exit 1
-fi
-
-echo "- Building code"
-pio run -s
-echo "- Building data"
-pio run --target buildfs -s
-echo "- Flashing data (SPIFFS)"
-echo "  This erases all saved settings"
-pio run --target uploadfs -s
 
 echo "- Flashing code"
 pio run --target upload -s
