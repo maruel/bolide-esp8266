@@ -1,0 +1,187 @@
+# Copyright 2021 Marc-Antoine Ruel. All rights reserved.
+# Use of this source code is governed under the Apache License, Version 2.0
+# that can be found in the LICENSE file.
+
+# Interfere with boot:
+# - RST -> button
+# - D3 (GPIO0) HIGH normal, LOW flash via UART; 10kOhm Pull Up; On startup 26MHz for 50ms
+# - TX (GPIO1) Out; On startup binary output for 20ms
+# - D4 (GPIO2) Out; Pulled HIGH; Drives on board LED; 10kOhm Pull Up; On startup 600ms low with 20ms of 25kHz
+# - RX (GPIO3) In
+# - D8 (GPIO15) In; LOW normal; HIGH boot to SDIO; 10kOhm Pull Down; On startup 200ms at 0.7V; Must not be pulled high during boot.
+# - D0 (GPIO16) In; pulse signal to RST to wake up from wifi; Float; Pull Down with INPUT_PULLDOWN_16
+
+
+# Left:
+# - TX (GPIO1) Idles High
+# - RX (GPIO3) Idles High
+# - D1 (GPIO5) Idles High
+# - D2 (GPIO4) Idles High
+# - D3 (GPIO0) Idles High
+# - D4 (GPIO2) LED Output
+# - GND
+# - 5V
+
+# Right:
+# - RST button
+# - A0 Analog In
+# - D0 (GPIO16) Idles Float (or Low)
+# - D5 (GPIO14) Idles High
+# - D6 (GPIO12) Idles High
+# - D7 (GPIO13) Idles High
+# - D8 (GPIO15) Idles Low
+# - 3v3
+
+
+# Left:
+# - TX (GPIO1) Idles High
+# - RX (GPIO3) Idles High           ; Button LED (Doesn't work when logging is enabled)
+# - D1 (GPIO5) Idles High           ; Button Monitor Up
+# - D2 (GPIO4) Idles High           ; Actuator Monitor Down
+# - D3 (GPIO0) Idles High           ; Button Monitor Down
+# - D4 (GPIO2) LED Output           ; Low when LED on
+# - GND
+# - 5V
+
+# Right:
+# - RST button
+# - A0 Analog In
+# - D0 (GPIO16) Idles Float (or Low); Actuator Seat Down
+# - D5 (GPIO14) Idles High          ; Button Seat Up
+# - D6 (GPIO12) Idles High          ; Button Seat Down
+# - D7 (GPIO13) Idles High          ; Actuator Monitor Up
+# - D8 (GPIO15) Idles Low           ; Actuator Seat Up
+# - 3v3
+
+# https://esphome.io/components/stepper/index.html
+# https://esphome.io/components/servo.html
+
+substitutions:
+  devicename: bolide
+  upper_devicename: "Bolide"
+
+
+esphome:
+  name: ${devicename}
+  platform: esp32
+  #board: d1_mini
+  build_path: out/${devicename}
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_pass
+  ap:
+    ssid: "${upper_devicename} is lost"
+    password: !secret wifi_ap_pass
+    ap_timeout: 5min
+
+captive_portal:
+
+logger:
+  level: ERROR
+  baud_rate: 0
+
+api:
+  services:
+    - service: ${devicename}_buzzer
+      variables:
+        song_str: string
+      then:
+        - rtttl.play:
+            rtttl: !lambda 'return song_str;'
+
+ota:
+  password: !secret ota_password
+
+status_led:
+  pin:
+    number: D4
+    inverted: True
+
+sensor:
+  - platform: wifi_signal
+    name: "${upper_devicename} WiFi Signal"
+    id: ${devicename}_wifi_signal
+    update_interval: 600s
+
+
+output:
+  # -platform: ledc
+  - platform: esp8266_pwm
+    pin: D7
+    id: ${devicename}_buzzer_out
+  - platform: esp8266_pwm
+    id: motor_left_1
+    pin: D2
+  - platform: esp8266_pwm
+    id: motor_left_2
+    pin: D2
+  - platform: esp8266_pwm
+    id: motor_right_1
+    pin: D1
+  - platform: esp8266_pwm
+    id: motor_right_2
+    pin: D1
+
+rtttl:
+  output: ${devicename}_buzzer_out
+
+
+binary_sensor:
+  - platform: gpio
+    name: "${upper_devicename} Button"
+    id: ${devicename}_button
+    pin:
+      number: D5
+    filters:
+      - delayed_off: 10ms
+    on_press:
+      then:
+        - rtttl.play: 'MissionImp:d=16,o=6,b=95:32d,32d#,32d,32d#,32d,32d#,32d,32d#,32d,32d,32d#,32e,32f,32f#,32g,g,8p,g,8p,a#,p,c7,p,g,8p,g,8p,f,p,f#,p,g,8p,g,8p,a#,p,c7,p,g,8p,g,8p,f,p,f#,p,a#,g,2d,32p,a#,g,2c#,32p,a#,g,2c,a#5,8c,2p,32p,a#5,g5,2f#,32p,a#5,g5,2f,32p,a#5,g5,2e,d#,8d'
+
+
+switch:
+- platform: output
+  name: "Motor left"
+  id: motor_left_1
+- platform: output
+  id: motor_left_2
+- platform: output
+  id: motor_right_1
+- platform: output
+  id: motor_right_2
+
+
+#cover:
+#- platform: time_based
+#  name: "${upper_devicename} Monitor"
+#  id: ${devicename}_monitor
+#  open_action:
+#    - cover.stop: ${devicename}_seat
+#    - switch.turn_on: monitor_relay_1
+#    - switch.turn_off: monitor_relay_2
+#  open_duration: 5.3s
+#  close_action:
+#    - cover.stop: ${devicename}_seat
+#    - switch.turn_off: monitor_relay_1
+#    - switch.turn_on: monitor_relay_2
+#  close_duration: 3.9s
+#  stop_action:
+#    - switch.turn_off: monitor_relay_1
+#    - switch.turn_off: monitor_relay_2
+#- platform: time_based
+#  name: "${upper_devicename} Seat"
+#  id: ${devicename}_seat
+#  open_action:
+#    - cover.stop: ${devicename}_monitor
+#    - switch.turn_on: seat_relay_1
+#    - switch.turn_off: seat_relay_2
+#  open_duration: 22s
+#  close_action:
+#    - cover.stop: ${devicename}_monitor
+#    - switch.turn_off: seat_relay_1
+#    - switch.turn_on: seat_relay_2
+#  close_duration: 25s
+#  stop_action:
+#    - switch.turn_off: seat_relay_1
+#    - switch.turn_off: seat_relay_2

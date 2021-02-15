@@ -1,3 +1,4 @@
-/data/homie/config.json
-/.pio
+/.esphome
 /.venv
+/out
+/secrets.yaml
